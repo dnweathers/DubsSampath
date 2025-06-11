@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import NoResultFound
 from app.models.sample import Sample
 from app.schemas.sample_schema import SampleCreate, SampleUpdate
+from fastapi import HTTPException, status
 
 
 def get_sample(db: Session, sample_id: UUID) -> Sample:
@@ -10,11 +11,14 @@ def get_sample(db: Session, sample_id: UUID) -> Sample:
     Fetch a single sample by its UUID.
 
     Raises:
-        sqlalchemy.exc.NoResultFound: If sample does not exist.
+        HTTPException 404 if sample does not exist.
     """
     sample = db.query(Sample).filter(Sample.id == sample_id).first()
     if not sample:
-        raise NoResultFound(f"Sample with ID {sample_id} not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Sample with ID {sample_id} not found"
+        )
     
     return sample
 
@@ -50,14 +54,16 @@ def update_sample(db: Session, sample_id: UUID, sample_update: SampleUpdate) -> 
     """
     Update sample fields.
     Raises:
-        sqlalchemy.exc.NoResultFound: If sample does not exist.
+        HTTPException 404 if sample does not exist.
     """
     sample = db.query(Sample).filter(Sample.id == sample_id).first()
     if not sample:
-        raise NoResultFound(f"Sample with ID {sample_id} not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Sample with ID {sample_id} not found"
+        )
     
     update_data = sample_update.model_dump(exclude_unset=True)
-
     for key, value in update_data.items():
         setattr(sample, key, value)
 
@@ -71,11 +77,14 @@ def delete_sample(db: Session, sample_id: UUID) -> str:
     """
     Delete sample from the database.
     Raises:
-        sqlalchemy.exc.NoResultFound: If sample does not exist.
+        HTTPException 404 if sample does not exist.
     """
     sample = db.query(Sample).filter(Sample.id == sample_id).first()
     if not sample:
-        raise NoResultFound(f"Sample with ID {sample_id} not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Sample with ID {sample_id} not found"
+        )
     
     db.delete(sample)
     db.commit()

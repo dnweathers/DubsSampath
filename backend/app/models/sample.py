@@ -2,10 +2,10 @@ import uuid
 from datetime import datetime, timezone
 from sqlalchemy import Column, String, DateTime, Enum, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy.orm import relationship
 import enum
 
-Base = declarative_base()
+from app.db.database import Base
 
 class SampleStatus(str, enum.Enum):
     pending = "pending"
@@ -21,7 +21,8 @@ class Sample(Base):
     status = Column(Enum(SampleStatus), nullable=False, default=SampleStatus.pending)
     type = Column(String(100), nullable=False)
 
-    assigned_user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    # assigned_user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    assigned_user_id = Column(UUID(as_uuid=True), nullable=True)
 
     date_collected = Column(DateTime, nullable=False)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
